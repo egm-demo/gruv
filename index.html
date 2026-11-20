@@ -1,0 +1,617 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Грув</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+[data-theme=arbuz]{--bg:#121813;--panel:#182019;--card:#212c23;--card2:#263329;--line:#33443a;--ink:#e8f0e1;--muted:#b4c2ae;--accent:#b5d86a;--accent-ink:#172008;--hot:#ff8a5c;--c0:#b5d86a;--c1:#ff8a5c;--c2:#5ec8e5;--c3:#f2c94c;--c4:#c58af9;--c5:#ff6f91;--c6:#5fd9aa;--c7:#8fa8ff}
+[data-theme=asiimov]{--bg:#e9e8e3;--panel:#f5f4f0;--card:#ffffff;--card2:#eeede8;--line:#b9b6ab;--ink:#141414;--muted:#4a4843;--accent:#ff6a13;--accent-ink:#141414;--hot:#141414;--c0:#5f9a12;--c1:#e0541a;--c2:#1688b0;--c3:#b88a00;--c4:#8a4fd6;--c5:#d63a66;--c6:#14916a;--c7:#4862d8}
+[data-theme=night]{--bg:#101114;--panel:#16181c;--card:#1f2227;--card2:#262a31;--line:#343944;--ink:#eceef2;--muted:#b3b8c4;--accent:#5ec8e5;--accent-ink:#04222b;--hot:#ff7b7b;--c0:#b5d86a;--c1:#ff8a5c;--c2:#5ec8e5;--c3:#f2c94c;--c4:#c58af9;--c5:#ff6f91;--c6:#5fd9aa;--c7:#8fa8ff}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px;border:2px solid transparent;background-clip:padding-box}::-webkit-scrollbar-thumb:hover{background:var(--muted);background-clip:padding-box;border:2px solid transparent}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:13px/1.35 "Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;display:grid;grid-template-rows:54px minmax(0,1fr) 292px;min-width:1080px;overflow:hidden;user-select:none}
+button,input,select{font:inherit;color:inherit}
+button{background:var(--card);border:1px solid var(--line);border-radius:7px;padding:5px 10px;cursor:pointer;white-space:nowrap}
+button:hover{background:var(--card2)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+button.accent,button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+select,input[type=number],input[type=search]{background:var(--card);border:1px solid var(--line);border-radius:7px;padding:5px 7px}
+input[type=range]{accent-color:var(--accent);height:18px;margin:0;min-width:0}
+.mono{font-family:"Cascadia Mono",Consolas,monospace}
+.grow{flex:1}
+.muted{color:var(--muted)}
+
+body.notes{grid-template-rows:54px minmax(0,1fr) min(390px,46vh)}
+#top{display:flex;align-items:center;gap:10px;padding:0 14px;background:var(--panel);border-bottom:1px solid var(--line)}
+.logo{font-weight:800;letter-spacing:.14em;font-size:15px;margin-right:6px}
+.logo i{color:var(--accent);font-style:normal}
+#playBtn{min-width:112px;height:36px;font-size:15px;padding:0 14px;font-weight:700;background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+body.playing #playBtn{background:var(--hot);border-color:var(--hot);color:#fff}
+.fld{display:flex;align-items:center;gap:6px;color:var(--muted)}
+.fld input[type=number]{width:58px;text-align:center;color:var(--ink);font-weight:600}
+.fld input[type=range]{width:90px}
+.fld button{padding:3px 9px}
+#meter{border:1px solid var(--line);border-radius:4px;background:var(--card)}
+
+main{display:grid;grid-template-columns:270px minmax(0,1fr);min-height:0}
+#lib{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.tabs{display:flex;gap:4px;padding:10px 10px 0}
+.tabs button{flex:1;padding:6px 4px}
+#lib .tools{padding:8px 10px;display:flex;gap:6px;flex-wrap:wrap}
+#lib .tools input[type=search]{flex:1 1 100%;width:100%}
+#lib .tools button{flex:1}
+#list{flex:1;overflow-y:auto;padding:0 6px 10px}
+.grp{display:flex;align-items:center;gap:6px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:10px 6px 4px}
+.grp span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.grp button,.it button{padding:0;width:24px;height:24px;line-height:1;flex:none}
+.it{display:flex;align-items:center;gap:6px;padding:3px 6px;border-radius:7px;cursor:pointer}
+.it:hover{background:var(--card)}
+.it .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.it .pv{color:var(--accent);width:14px;flex:none;font-size:10px}
+.it .x{opacity:0;border:none;background:none;color:var(--muted)}
+.it:hover .x{opacity:1}
+.dropHint{margin:6px 6px 0;padding:14px 10px;border:1.5px dashed var(--line);border-radius:10px;color:var(--muted);text-align:center;line-height:1.5}
+.dropHint b{color:var(--ink)}
+
+#work{display:flex;flex-direction:column;min-width:0;min-height:0}
+#patbar{display:flex;align-items:center;gap:6px;padding:8px 12px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+#patbar .pb{min-width:32px;font-weight:700}
+#patbar .sep{width:1px;height:20px;background:var(--line);margin:0 4px}
+.seg{display:flex}
+.seg button{border-radius:0;margin-left:-1px}
+.seg button:first-child{border-radius:7px 0 0 7px;margin-left:0}
+.seg button:last-child{border-radius:0 7px 7px 0}
+#rowsWrap{flex:1;overflow-y:auto;min-height:0;padding:8px 12px}
+#rows{position:relative;--thw:292px}
+.row{display:flex;align-items:stretch;height:36px;border-radius:8px}
+.row.sel{background:color-mix(in srgb,var(--accent) 13%,transparent)}
+.ruler{display:flex;height:18px;font-size:11px;color:var(--muted)}
+.ruler i{width:var(--thw);flex:none}
+.ruler .cells div{padding-left:5px;font-family:"Cascadia Mono",Consolas,monospace}
+.row.over{outline:2px dashed var(--accent)}
+.th{width:var(--thw);flex:none;display:flex;align-items:center;gap:5px;padding:0 8px 0 6px}
+.chip{width:6px;height:22px;border-radius:3px;flex:none}
+.tname{flex:1;min-width:0;background:none;border:1px solid transparent;border-radius:5px;padding:3px 4px;font-weight:600;text-overflow:ellipsis}
+.tname:hover{border-color:var(--line)}
+.kind{font-size:10px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;flex:none;margin-right:4px}
+.th button{padding:0;width:24px;height:24px;font-size:11px;font-weight:700;flex:none}
+.th button.on.s{background:#f2c94c;border-color:#f2c94c;color:#221a00}
+.th button.on.m{background:var(--hot);border-color:var(--hot);color:#fff}
+.th .del{border:none;background:none;color:var(--muted);font-size:15px}
+.tvol{width:62px;flex:none}
+.cells{flex:1;display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));min-width:0}
+.c{margin:3px 2px;border-radius:5px;background:var(--card);border:1px solid var(--line);cursor:pointer}
+.c.q{background:var(--card2);border-color:color-mix(in srgb,var(--line) 60%,var(--ink))}
+.c:hover{border-color:var(--ink)}
+.c.on{background:var(--tc)!important;border-color:var(--tc)}
+.c.hold{background:color-mix(in srgb,var(--tc) 30%,var(--card))!important;border-color:transparent;margin-left:-2px;border-radius:0 5px 5px 0}
+.row.off .c.on,.row.off .c.hold{opacity:.35}
+.ph{position:absolute;top:18px;bottom:0;pointer-events:none;background:color-mix(in srgb,var(--accent) 22%,transparent);border-radius:5px;display:none;left:calc(var(--thw) + (100% - var(--thw)) * var(--ph,0) / var(--n));width:calc((100% - var(--thw)) / var(--n))}
+body.playing .ph,body.playing .rph{display:block}
+.addrow{display:flex;gap:8px;align-items:center;padding:10px 6px;color:var(--muted)}
+#song{display:flex;align-items:center;gap:6px;padding:8px 12px;border-top:1px solid var(--line);flex-wrap:wrap;min-height:46px}
+#song .lbl{font-weight:700;margin-right:4px}
+.sc{min-width:30px;font-weight:700;padding:4px 8px}
+.sc.now{outline:2px solid var(--accent)}
+.sadd{border-style:dashed;font-weight:400}
+
+#dev{background:var(--panel);border-top:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.dh{display:flex;align-items:center;gap:8px;padding:8px 12px;height:42px;flex:none}
+.dh b{font-size:14px}
+.dh select{padding:3px 6px}
+.dbody{flex:1;min-height:0;display:flex;gap:10px;padding:0 12px 12px;overflow-x:auto}
+.dv{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:232px;flex:none;display:flex;flex-direction:column;gap:7px}
+.dv.offd .k{opacity:.62}
+.dv h4{margin:0 0 2px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;height:24px}
+.dv h4 button{padding:2px 9px;font-size:11px;letter-spacing:0;text-transform:none}
+.k{display:grid;grid-template-columns:74px minmax(0,1fr) 54px;align-items:center;gap:6px}
+.k>span{color:var(--muted)}
+.k output{text-align:right;font-size:12px;font-family:"Cascadia Mono",Consolas,monospace}
+.k select{grid-column:2/4}
+.chk{display:flex;gap:7px;align-items:center;color:var(--muted)}
+.srcname{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.roll{flex:1;min-height:0;margin:0 12px 12px;border:1px solid var(--line);border-radius:10px;overflow-y:auto;display:grid;grid-template-columns:50px minmax(0,1fr);background:var(--card)}
+.keys div{height:14px;font-size:10px;line-height:13px;padding-left:5px;color:var(--ink);font-family:"Cascadia Mono",Consolas,monospace;border-bottom:1px solid var(--line);background:var(--card2)}
+.keys .bk{background:var(--bg);color:var(--muted)}
+.keys .cn{color:var(--ink);font-weight:700}
+.area{position:relative;cursor:crosshair;--n:16}
+.area .r{height:14px;border-bottom:1px solid color-mix(in srgb,var(--line) 55%,transparent)}
+.area .r.bk{background:color-mix(in srgb,var(--bg) 55%,transparent)}
+.area .r.dim{background:repeating-linear-gradient(135deg,transparent 0 4px,color-mix(in srgb,var(--line) 60%,transparent) 4px 5px)}
+.area .vl{position:absolute;inset:0;pointer-events:none;background:
+ repeating-linear-gradient(90deg,var(--line) 0 1px,transparent 1px calc(100% / var(--n)));opacity:.55}
+.area .vb{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(90deg,transparent 0 calc(400% / var(--n)),color-mix(in srgb,var(--ink) 5%,transparent) calc(400% / var(--n)) calc(800% / var(--n)))}
+.note{position:absolute;height:13px;border-radius:3px;background:var(--tc);border:1px solid rgba(0,0,0,.35);cursor:pointer}
+.rph{position:absolute;top:0;bottom:0;pointer-events:none;display:none;background:color-mix(in srgb,var(--accent) 20%,transparent);left:calc(100% * var(--ph,0) / var(--n));width:calc(100% / var(--n))}
+.empty{margin:auto;color:var(--muted);text-align:center;line-height:1.7}
+
+#menu{position:fixed;top:50px;right:12px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:6px;z-index:20;display:flex;flex-direction:column;gap:2px;min-width:250px;box-shadow:0 12px 30px rgba(0,0,0,.35)}
+#menu button{border:none;background:none;text-align:left;padding:8px 10px}
+#menu button:hover{background:var(--card2)}
+#menu hr{border:none;border-top:1px solid var(--line);margin:4px 0;width:100%}
+#menu .th3{display:flex;gap:4px;padding:4px 6px}
+#menu .th3 button{flex:1;text-align:center;border:1px solid var(--line)}
+#menu .th3 button.on{background:var(--accent);color:var(--accent-ink)}
+#help{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:30;display:grid;place-items:center}
+#help .box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 26px;width:560px;max-width:92vw;user-select:text}
+#help h3{margin:0 0 10px;font-size:18px}
+#help ol{margin:0 0 14px;padding-left:20px;line-height:1.75}
+#help kbd{font-family:"Cascadia Mono",Consolas,monospace;border:1px solid var(--line);border-radius:4px;padding:0 5px;background:var(--card2)}
+#toast{position:fixed;left:50%;top:64px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:9px;font-weight:600;z-index:40;opacity:0;transition:opacity .2s;pointer-events:none;max-width:70vw;text-align:center}
+#toast.show{opacity:1}
+#drop{position:fixed;inset:10px;border:3px dashed var(--accent);border-radius:18px;background:color-mix(in srgb,var(--bg) 82%,transparent);z-index:50;display:none;place-items:center;font-size:22px;font-weight:700;pointer-events:none}
+body.dragging #drop{display:grid}
+</style>
+</head>
+<body data-theme="arbuz">
+<header id="top">
+  <div class="logo">ГР<i>У</i>В</div>
+  <button id="playBtn" data-act="play" title="Пробел">▶ Играть</button>
+  <div class="fld">Темп <button data-act="bpm" data-v="-1">−</button><input id="bpm" type="number" min="40" max="240" class="mono"><button data-act="bpm" data-v="1">+</button></div>
+  <div class="fld" title="Сдвигает каждую вторую долю — бит начинает «качать»">Свинг <input id="swing" type="range" min="0" max="0.6" step="0.02"></div>
+  <span class="grow"></span>
+  <canvas id="meter" width="96" height="14" title="Уровень звука"></canvas>
+  <div class="fld">Громкость <input id="master" type="range" min="0" max="1" step="0.01"></div>
+  <button data-act="undo" title="Ctrl+Z">↶ Отмена</button>
+  <button data-act="export" class="accent" title="Готовый трек файлом в папку «Загрузки»">Сохранить WAV</button>
+  <button data-act="menu" title="Меню">☰ Меню</button>
+</header>
+<main>
+  <aside id="lib">
+    <div class="tabs" id="libTabs"></div>
+    <div class="tools" id="libTools"></div>
+    <div id="list"></div>
+  </aside>
+  <section id="work">
+    <div id="patbar"></div>
+    <div id="rowsWrap"><div id="rows"></div></div>
+    <div id="song"></div>
+  </section>
+</main>
+<footer id="dev"></footer>
+<div id="menu" hidden></div>
+<div id="help" hidden></div>
+<div id="toast"></div>
+<div id="drop">Отпусти — звуки попадут в «Мои звуки»</div>
+<input type="file" id="fFiles" multiple accept="audio/*,.wav,.mp3,.ogg,.flac,.m4a,.aac,.aif,.aiff,.opus" hidden>
+<input type="file" id="fDir" webkitdirectory hidden>
+<input type="file" id="fProj" accept=".json" hidden>
+<script>
+'use strict';
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const SR=44100, NN=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const RU_NOTE=['До','До#','Ре','Ре#','Ми','Фа','Фа#','Соль','Соль#','Ля','Ля#','Си'];
+const COLORS=[0,1,2,3,4,5,6,7].map(i=>'var(--c'+i+')');
+const NMIN=24,NMAX=83,RH=14;
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-4);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+/* ---------- встроенные звуки: считаются математикой, без файлов ---------- */
+const rnd=()=>Math.random()*2-1;
+const envf=(t,a,d)=>t<0?0:t<a?t/a:Math.exp(-(t-a)/d);
+function tone(d,o){const {f0,f1=f0,drop=.05,dec,amp=1,type='sine',atk=.001}=o;let ph=0;for(let i=0;i<d.length;i++){const t=i/SR,f=f1+(f0-f1)*Math.exp(-t/drop);ph+=2*Math.PI*f/SR;let s=Math.sin(ph);if(type==='square')s=s>0?1:-1;else if(type==='tri')s=2/Math.PI*Math.asin(s);d[i]+=s*amp*envf(t,atk,dec);}}
+function noise(d,o){const {dec,amp=1,hp=0,lp=1,atk=.001,start=0}=o;let l=0,h=0;for(let i=Math.floor(start*SR);i<d.length;i++){const t=i/SR-start;let x=rnd();l+=lp*(x-l);x=l;h+=hp*(x-h);x-=h;d[i]+=x*amp*envf(t,atk,dec);}}
+function sat(d,k){for(let i=0;i<d.length;i++)d[i]=Math.tanh(d[i]*k);}
+const BUILTIN=[
+ ['kick','Кик','Бочки',.5,d=>{tone(d,{f0:150,f1:45,drop:.04,dec:.2});noise(d,{dec:.004,amp:.3})}],
+ ['kick808','Кик 808 длинный','Бочки',1.4,d=>{tone(d,{f0:125,f1:43,drop:.06,dec:.6});sat(d,1.7)}],
+ ['kickhard','Кик жёсткий','Бочки',.4,d=>{tone(d,{f0:230,f1:52,drop:.024,dec:.15});noise(d,{dec:.003,amp:.4});sat(d,3)}],
+ ['kicksoft','Кик мягкий','Бочки',.5,d=>{tone(d,{f0:95,f1:48,drop:.06,dec:.22})}],
+ ['snare','Снейр','Снейры и клэпы',.35,d=>{tone(d,{f0:200,f1:165,drop:.03,dec:.08,amp:.6});noise(d,{dec:.12,amp:.8,hp:.25})}],
+ ['snare2','Снейр плотный','Снейры и клэпы',.45,d=>{tone(d,{f0:230,f1:175,drop:.03,dec:.11,amp:.7});noise(d,{dec:.19,amp:.8,hp:.1,lp:.6});sat(d,1.6)}],
+ ['clap','Клэп','Снейры и клэпы',.45,d=>{for(const s of[0,.011,.023])noise(d,{start:s,dec:.007,amp:.8,hp:.3,lp:.7});noise(d,{start:.034,dec:.11,amp:.8,hp:.3,lp:.7})}],
+ ['rim','Римшот','Снейры и клэпы',.12,d=>{tone(d,{f0:820,dec:.012,type:'square',amp:.4});tone(d,{f0:1720,dec:.008,amp:.6})}],
+ ['snap','Щелчок','Снейры и клэпы',.16,d=>{noise(d,{dec:.018,hp:.5});tone(d,{f0:1500,dec:.01,amp:.4})}],
+ ['hat','Хэт закрытый','Хэты и тарелки',.12,d=>noise(d,{dec:.028,hp:.8})],
+ ['ohat','Хэт открытый','Хэты и тарелки',.6,d=>noise(d,{dec:.2,hp:.8})],
+ ['shaker','Шейкер','Хэты и тарелки',.2,d=>noise(d,{atk:.02,dec:.045,hp:.6,lp:.8})],
+ ['ride','Райд','Хэты и тарелки',1.2,d=>{noise(d,{dec:.45,hp:.85,amp:.6});tone(d,{f0:5200,dec:.4,type:'square',amp:.08})}],
+ ['crash','Крэш','Хэты и тарелки',2,d=>noise(d,{dec:.75,hp:.6})],
+ ['tomL','Том низкий','Перкуссия',.6,d=>tone(d,{f0:150,f1:82,drop:.08,dec:.24})],
+ ['tomH','Том высокий','Перкуссия',.5,d=>tone(d,{f0:250,f1:150,drop:.07,dec:.2})],
+ ['conga','Конга','Перкуссия',.3,d=>{tone(d,{f0:420,f1:330,drop:.02,dec:.1});noise(d,{dec:.006,amp:.25})}],
+ ['cowbell','Ковбелл','Перкуссия',.35,d=>{tone(d,{f0:540,dec:.11,type:'square',amp:.5});tone(d,{f0:800,dec:.11,type:'square',amp:.5})}],
+ ['sub','808 бас (нота Ля)','Бас и эффекты',1.3,d=>{tone(d,{f0:75,f1:55,drop:.02,dec:.7});sat(d,2)}],
+ ['laser','Лазер','Бас и эффекты',.3,d=>tone(d,{f0:2600,f1:200,drop:.06,dec:.14,type:'square',amp:.6})],
+ ['impact','Удар-бум','Бас и эффекты',2,d=>{tone(d,{f0:95,f1:30,drop:.2,dec:.7});noise(d,{dec:.5,lp:.08,amp:1.5})}],
+ ['riser','Подъём (шум)','Бас и эффекты',2,d=>{let l=0;for(let i=0;i<d.length;i++){const t=i/SR,k=t/2;l+=(.02+k*k*.9)*(rnd()-l);d[i]=l*k*k*(t>1.97?(2-t)/.03:1)*2}}],
+];
+const BUF=new Map(), BNAME={};
+function genBuiltins(){for(const [id,name,cat,dur,fn] of BUILTIN){const d=new Float32Array(Math.floor(dur*SR));fn(d);let p=0;for(let i=0;i<d.length;i++)p=Math.max(p,Math.abs(d[i]));const fo=Math.min(600,d.length);for(let i=0;i<d.length;i++){let g=.9/(p||1);if(i>d.length-fo)g*=(d.length-i)/fo;d[i]*=g}const b=new AudioBuffer({length:d.length,sampleRate:SR,numberOfChannels:1});b.copyToChannel(d,0);BUF.set('b:'+id,b);BNAME['b:'+id]=name;}}
+
+/* ---------- синтезаторы ---------- */
+const SYNTHS={
+ bass:{name:'Бас',cat:'Бас',oscs:[['sawtooth',0,0,.6],['square',-12,0,.4]],a:.005,d:.18,s:.5,r:.08,cut:420,env:2200,q:6,key:36},
+ sub:{name:'Саб-бас 808',cat:'Бас',oscs:[['sine',0,0,1],['triangle',0,0,.25]],a:.004,d:.5,s:.7,r:.25,cut:900,env:0,q:0,key:36},
+ lead:{name:'Лид',cat:'Мелодия',oscs:[['sawtooth',0,-8,.5],['sawtooth',0,8,.5]],a:.01,d:.2,s:.7,r:.15,cut:2000,env:2500,q:3,key:60},
+ pluck:{name:'Плак',cat:'Мелодия',oscs:[['square',0,0,.5],['sawtooth',12,0,.25]],a:.002,d:.12,s:.05,r:.14,cut:600,env:5000,q:4,key:60},
+ keys:{name:'Клавиши',cat:'Мелодия',oscs:[['triangle',0,0,.7],['sine',12,0,.3]],a:.003,d:.6,s:.15,r:.3,cut:2600,env:1500,q:0,key:60},
+ chip:{name:'8-бит',cat:'Мелодия',oscs:[['square',0,0,.45]],a:.002,d:.1,s:.7,r:.05,cut:6000,env:0,q:0,key:60},
+ pad:{name:'Пэд (фон)',cat:'Фон',oscs:[['sawtooth',0,-10,.35],['sawtooth',0,10,.35],['triangle',-12,0,.4]],a:.25,d:.5,s:.8,r:.7,cut:1300,env:600,q:1,key:48},
+ strings:{name:'Струнные',cat:'Фон',oscs:[['sawtooth',0,-6,.4],['sawtooth',0,6,.4],['sawtooth',12,3,.15]],a:.12,d:.4,s:.85,r:.4,cut:2400,env:300,q:0,key:60},
+};
+const SCALES={all:null,minor:[0,2,3,5,7,8,10],major:[0,2,4,5,7,9,11],penta:[0,3,5,7,10]};
+
+/* ---------- состояние проекта ---------- */
+function newTrack(o){return Object.assign({id:uid(),name:'Дорожка',type:'sample',src:'b:kick',preset:'bass',vol:.8,pan:0,pitch:0,mute:false,solo:false,cut:true,bright:1,rel:1,color:0,
+ fx:{filter:{on:false,type:'lowpass',freq:1800,q:1},drive:{on:false,amt:.3},delay:{on:false,div:3,fb:.35,mix:.3},reverb:{on:false,mix:.25}}},o)}
+function newPattern(len){return {len:len||16,steps:{},notes:{}}}
+function st(arr,len){const a=new Array(len||16).fill(0);for(const i of arr)a[i]=1;return a}
+function demoProject(){
+ const k=newTrack({name:'Кик',src:'b:kick',color:0,vol:.9}),c=newTrack({name:'Клэп',src:'b:clap',color:1,vol:.7}),h=newTrack({name:'Хэт',src:'b:hat',color:2,vol:.5}),
+  o=newTrack({name:'Открытый хэт',src:'b:ohat',color:3,vol:.4}),b=newTrack({name:'Бас',type:'synth',preset:'bass',color:4,vol:.75}),
+  ch=newTrack({name:'Аккорды',type:'synth',preset:'keys',color:5,vol:.6});
+ ch.fx.reverb.on=true;ch.fx.delay.on=true;ch.fx.delay.mix=.2;c.fx.reverb.on=true;c.fx.reverb.mix=.15;
+ const A=newPattern(),B=newPattern();
+ A.steps[k.id]=st([0,4,8,12]);A.steps[c.id]=st([4,12]);A.steps[h.id]=st([2,6,10,14]);A.steps[o.id]=st([]);
+ A.notes[b.id]=[[2,33],[3,33],[6,33],[7,45],[10,33],[11,33],[14,36],[15,31]].map(([s,n])=>({s,n,l:1}));
+ const chord=(s,l,ns)=>ns.map(n=>({s,n,l}));
+ A.notes[ch.id]=[...chord(0,2,[57,60,64]),...chord(3,2,[57,60,64]),...chord(6,2,[57,60,64]),...chord(8,2,[53,57,60]),...chord(11,2,[53,57,60]),...chord(14,2,[55,59,62])];
+ B.steps[k.id]=st([0,4,8,12,15]);B.steps[c.id]=st([4,12,14]);B.steps[h.id]=st([0,2,4,6,8,10,12,14]);B.steps[o.id]=st([6,14]);
+ B.notes[b.id]=[[2,29],[3,29],[6,29],[7,41],[10,31],[11,31],[14,31],[15,43]].map(([s,n])=>({s,n,l:1}));
+ B.notes[ch.id]=[...chord(0,2,[53,57,60]),...chord(3,2,[53,57,60]),...chord(6,2,[53,57,60]),...chord(8,2,[55,59,62]),...chord(11,2,[55,59,62]),...chord(14,2,[52,56,59])];
+ return {v:1,bpm:122,swing:0,master:.8,tracks:[k,c,h,o,b,ch],patterns:[A,B],cur:0,song:[0,0,1,1],mode:'pattern',scale:{root:9,type:'minor'}};
+}
+function emptyProject(){const k=newTrack({name:'Кик',src:'b:kick',color:0}),s=newTrack({name:'Снейр',src:'b:snare',color:1}),h=newTrack({name:'Хэт',src:'b:hat',color:2,vol:.5});
+ return {v:1,bpm:120,swing:0,master:.8,tracks:[k,s,h],patterns:[newPattern()],cur:0,song:[],mode:'pattern',scale:{root:9,type:'minor'}}}
+let S;
+try{S=JSON.parse(localStorage.getItem('gruv_project'))}catch(e){}
+if(!S||!S.tracks||!S.patterns)S=demoProject();
+let sel=S.tracks[0]&&S.tracks[0].id, devTab='notes', libTab='builtin', libQ='', userSounds=[], undo=[];
+const rollScroll={};
+const T=id=>S.tracks.find(t=>t.id===id);
+const P=()=>S.patterns[S.cur]||S.patterns[0];
+function steps(p,tid){let a=p.steps[tid];if(!a||a.length!==p.len){const n=new Array(p.len).fill(0);if(a)for(let i=0;i<Math.min(a.length,p.len);i++)n[i]=a[i];a=p.steps[tid]=n}return a}
+function notes(p,tid){return p.notes[tid]||(p.notes[tid]=[])}
+function save(){try{localStorage.setItem('gruv_project',JSON.stringify(S))}catch(e){}}
+function pushUndo(){undo.push(JSON.stringify(S));if(undo.length>60)undo.shift()}
+function srcName(src){if(!src)return '—';if(src[0]==='b')return BNAME[src]||'?';const m=userSounds.find(u=>'u:'+u.id===src);return m?m.name:'звук не найден'}
+
+/* ---------- хранилище своих звуков (IndexedDB) ---------- */
+const DB=new Promise((res,rej)=>{try{const r=indexedDB.open('gruv_db',1);r.onupgradeneeded=()=>{r.result.createObjectStore('meta',{keyPath:'id'});r.result.createObjectStore('data')};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}catch(e){rej(e)}});
+function idb(store,mode,fn){return DB.then(db=>new Promise((res,rej)=>{const tx=db.transaction(store,mode);const rq=fn(tx.objectStore(store));tx.oncomplete=()=>res(rq&&rq.result);tx.onerror=()=>rej(tx.error);tx.onabort=()=>rej(tx.error)}))}
+const AUDIO_EXT=/\.(wav|mp3|ogg|oga|flac|m4a|aac|aif|aiff|opus|webm)$/i;
+async function importFiles(items){
+ const list=items.filter(x=>AUDIO_EXT.test(x.f.name)||/^audio\//.test(x.f.type));
+ if(!list.length){toast('Тут нет звуковых файлов (нужны wav, mp3, ogg, flac, m4a)');return 0}
+ let done=0;
+ for(const {f,folder} of list){
+  try{const ab=await f.arrayBuffer(),id=uid();
+   await idb('data','readwrite',s=>s.put(ab,id));
+   const meta={id,name:f.name.replace(/\.[^.]+$/,''),folder:folder||'Без папки',size:f.size,added:Date.now()};
+   await idb('meta','readwrite',s=>s.put(meta));userSounds.push(meta);done++;
+   if(done%5===0||done===list.length)toast('Загружаю звуки: '+done+' из '+list.length,1500);
+  }catch(e){console.warn('import',f.name,e)}
+ }
+ libTab='user';renderLib();
+ toast(done===list.length?'Готово: добавлено звуков — '+done:'Добавлено '+done+' из '+list.length+' (остальные не прочитались)');
+ return done;
+}
+async function delSounds(ids){for(const id of ids){await idb('meta','readwrite',s=>s.delete(id));await idb('data','readwrite',s=>s.delete(id));BUF.delete('u:'+id)}userSounds=userSounds.filter(u=>!ids.includes(u.id));renderLib();renderGrid();renderDev()}
+const decoder=new OfflineAudioContext(2,1,SR);
+const loading=new Map();
+function loadBuf(src){
+ if(BUF.has(src))return Promise.resolve(BUF.get(src));
+ if(loading.has(src))return loading.get(src);
+ const p=(async()=>{const data=await idb('data','readonly',s=>s.get(src.slice(2)));if(!data)throw new Error('нет файла');const b=await decoder.decodeAudioData(data.slice(0));BUF.set(src,b);return b})();
+ loading.set(src,p);p.then(()=>loading.delete(src),()=>loading.delete(src));return p;
+}
+
+/* ---------- звуковой движок ---------- */
+const curves={};
+function driveCurve(k){const key=Math.round(k*50);if(curves[key])return curves[key];const n=1024,c=new Float32Array(n),g=1+k*24;for(let i=0;i<n;i++){const x=i/(n-1)*2-1;c[i]=Math.tanh(x*g)/Math.tanh(g)*(1-.35*k)}return curves[key]=c}
+class Engine{
+ constructor(ctx,live){this.ctx=ctx;this.live=live;this.tn=new Map();this.voices=new Set();
+  this.master=ctx.createGain();this.lim=ctx.createDynamicsCompressor();
+  this.lim.threshold.value=-8;this.lim.knee.value=6;this.lim.ratio.value=14;this.lim.attack.value=.003;this.lim.release.value=.15;
+  this.master.connect(this.lim);this.lim.connect(ctx.destination);
+  const len=Math.floor(ctx.sampleRate*2.4),ir=ctx.createBuffer(2,len,ctx.sampleRate);
+  for(let c=0;c<2;c++){const d=ir.getChannelData(c);for(let i=0;i<len;i++)d[i]=rnd()*Math.pow(1-i/len,2.6)*(i<200?i/200:1)}
+  this.rev=ctx.createConvolver();this.rev.buffer=ir;this.rev.connect(this.master);}
+ set(param,v){if(this.live)param.setTargetAtTime(v,this.ctx.currentTime,.015);else param.value=v}
+ nodes(tr){let n=this.tn.get(tr.id);if(n)return n;const c=this.ctx;
+  n={in:c.createGain(),shaper:c.createWaveShaper(),filter:c.createBiquadFilter(),pan:c.createStereoPanner(),vol:c.createGain(),
+   dsend:c.createGain(),delay:c.createDelay(2),fb:c.createGain(),rsend:c.createGain(),last:null};
+  n.shaper.oversample='2x';
+  n.in.connect(n.shaper);n.shaper.connect(n.filter);n.filter.connect(n.pan);n.pan.connect(n.vol);n.vol.connect(this.master);
+  n.filter.connect(n.dsend);n.dsend.connect(n.delay);n.delay.connect(n.fb);n.fb.connect(n.delay);n.delay.connect(n.pan);
+  n.vol.connect(n.rsend);n.rsend.connect(this.rev);
+  n.vol.gain.value=0;n.dsend.gain.value=0;n.rsend.gain.value=0;n.fb.gain.value=0;
+  this.tn.set(tr.id,n);return n}
+ apply(tr){const n=this.nodes(tr),f=tr.fx,anySolo=S.tracks.some(t=>t.solo),on=!tr.mute&&(!anySolo||tr.solo);
+  this.set(n.vol.gain,on?tr.vol*tr.vol*1.2:0);this.set(n.pan.pan,tr.pan);
+  n.shaper.curve=f.drive.on?driveCurve(f.drive.amt):null;
+  if(f.filter.on){n.filter.type=f.filter.type;this.set(n.filter.frequency,f.filter.freq);this.set(n.filter.Q,f.filter.q)}
+  else{n.filter.type='lowpass';this.set(n.filter.frequency,21000);this.set(n.filter.Q,.0001)}
+  this.set(n.dsend.gain,f.delay.on?f.delay.mix:0);this.set(n.fb.gain,f.delay.on?f.delay.fb:0);
+  this.set(n.delay.delayTime,clamp(60/S.bpm/4*f.delay.div,.01,1.9));
+  this.set(n.rsend.gain,f.reverb.on?f.reverb.mix*1.4:0)}
+ applyAll(){this.set(this.master.gain,S.master);for(const tr of S.tracks)this.apply(tr);
+  for(const [id,n] of this.tn)if(!T(id)){try{n.vol.disconnect();n.rsend.disconnect();n.fb.disconnect()}catch(e){}this.tn.delete(id)}}
+ track(v){this.voices.add(v);v.srcs[0].onended=()=>this.voices.delete(v)}
+ trigger(tr,time,o){o=o||{};const c=this.ctx,n=this.nodes(tr),vel=o.vel==null?.9:o.vel;
+  if(tr.type==='sample'){const buf=BUF.get(tr.src);if(!buf)return;
+   const s=c.createBufferSource(),g=c.createGain();s.buffer=buf;
+   s.playbackRate.value=Math.pow(2,(tr.pitch+(o.note==null?0:o.note-60))/12);g.gain.value=vel;s.connect(g);g.connect(n.in);
+   if(tr.cut&&n.last){try{n.last.g.gain.setTargetAtTime(0,time,.004);n.last.srcs[0].stop(time+.06)}catch(e){}}
+   const v={g,srcs:[s]};n.last=v;this.track(v);s.start(time);return}
+  const p=SYNTHS[tr.preset]||SYNTHS.bass,note=(o.note==null?p.key:o.note)+tr.pitch,dur=Math.max(.03,o.dur||.2);
+  const f=440*Math.pow(2,(note-69)/12),flt=c.createBiquadFilter(),g=c.createGain();
+  const cut=Math.min(18000,p.cut*tr.bright),top=Math.min(18000,cut+p.env*tr.bright);
+  flt.type='lowpass';flt.Q.value=p.q;flt.frequency.setValueAtTime(top,time);flt.frequency.setTargetAtTime(cut,time,p.d/2);
+  const a=Math.min(p.a,dur),peak=vel*.42,rel=p.r*tr.rel,end=time+dur;
+  g.gain.setValueAtTime(0,time);g.gain.linearRampToValueAtTime(peak,time+a);g.gain.setTargetAtTime(peak*p.s,time+a,p.d/3);g.gain.setTargetAtTime(0,end,rel/3);
+  flt.connect(g);g.connect(n.in);const srcs=[];
+  for(const [type,semi,det,gain] of p.oscs){const os=c.createOscillator(),og=c.createGain();os.type=type;os.frequency.value=f*Math.pow(2,semi/12);os.detune.value=det;og.gain.value=gain;os.connect(og);og.connect(flt);os.start(time);os.stop(end+rel*2+.05);srcs.push(os)}
+  this.track({g,srcs})}
+ stopAll(){const now=this.ctx.currentTime;for(const v of this.voices){try{v.g.gain.cancelScheduledValues(now);v.g.gain.setTargetAtTime(0,now,.012);for(const s of v.srcs)s.stop(now+.09)}catch(e){}}this.voices.clear();for(const n of this.tn.values())n.last=null}
+}
+let ctx=null,live=null,an=null,mbuf=null;
+function ensureCtx(){if(!ctx){ctx=new AudioContext({latencyHint:'interactive'});live=new Engine(ctx,true);an=ctx.createAnalyser();an.fftSize=1024;mbuf=new Float32Array(1024);live.lim.connect(an);live.live=false;live.applyAll();live.live=true}
+ if(ctx.state!=='running')ctx.resume();return ctx}
+function schedStep(eng,pat,step,time,sd){for(const tr of S.tracks){
+  if(tr.type==='sample'){const v=pat.steps[tr.id];if(v&&v[step])eng.trigger(tr,time)}
+  else{const ns=pat.notes[tr.id];if(ns)for(const n of ns)if(n.s===step)eng.trigger(tr,time,{note:n.n,dur:n.l*sd*.96})}}}
+const play={on:false,step:0,pos:0,next:0,timer:null,q:[]};
+function songOn(){return S.mode==='song'&&S.song.length>0}
+function tick(){const sd=60/S.bpm/4;
+ while(play.next<ctx.currentTime+.13){const pi=songOn()?S.song[play.pos%S.song.length]:S.cur,pat=S.patterns[pi]||S.patterns[0];
+  if(play.step>=pat.len)play.step=0;
+  const t=play.next+(play.step%2?S.swing*sd*.5:0);schedStep(live,pat,play.step,t,sd);
+  play.q.push({t,step:play.step,pi,pos:play.pos});play.next+=sd;play.step++;
+  if(play.step>=pat.len){play.step=0;if(songOn())play.pos=(play.pos+1)%S.song.length}}}
+async function start(){ensureCtx();await preload();live.applyAll();play.on=true;play.step=0;play.pos=0;play.q=[];play.next=ctx.currentTime+.07;
+ clearInterval(play.timer);play.timer=setInterval(tick,25);tick();document.body.classList.add('playing');$('#playBtn').textContent='■ Стоп'}
+function stop(){play.on=false;clearInterval(play.timer);play.q=[];if(live)live.stopAll();document.body.classList.remove('playing');$('#playBtn').textContent='▶ Играть';$$('.sc.now').forEach(e=>e.classList.remove('now'))}
+function preload(){return Promise.all(S.tracks.filter(t=>t.type==='sample').map(t=>loadBuf(t.src).catch(()=>null)))}
+function audition(tr,note){ensureCtx();live.apply(tr);const go=()=>live.trigger(tr,ctx.currentTime+.005,{note,dur:.28});if(tr.type==='sample'&&!BUF.has(tr.src))loadBuf(tr.src).then(go,()=>toast('Этот звук не читается'));else go()}
+let pvVoice=null;
+async function preview(src){ensureCtx();try{const buf=await loadBuf(src);if(pvVoice){try{pvVoice.stop()}catch(e){}}const s=ctx.createBufferSource(),g=ctx.createGain();s.buffer=buf;g.gain.value=.8;s.connect(g);g.connect(live.master);s.start();pvVoice=s}catch(e){toast('Не получилось прочитать этот файл — возможно, он битый или формат не поддерживается')}}
+function previewSynth(id){ensureCtx();const tr=newTrack({type:'synth',preset:id,id:'__pv'});live.live=false;live.apply(tr);live.live=true;const k=SYNTHS[id].key;[0,3,7].forEach((d,i)=>live.trigger(tr,ctx.currentTime+.01+i*.16,{note:k+d,dur:.3}))}
+
+/* ---------- экспорт в WAV ---------- */
+async function renderSong(){
+ await preload();const sd=60/S.bpm/4,seq=S.song.length?S.song:[S.cur,S.cur,S.cur,S.cur];
+ let total=0;for(const pi of seq)total+=(S.patterns[pi]||S.patterns[0]).len;
+ const dur=total*sd+3,o=new OfflineAudioContext(2,Math.ceil(dur*SR),SR),eng=new Engine(o,false);eng.applyAll();
+ let t=.02;for(const pi of seq){const pat=S.patterns[pi]||S.patterns[0];for(let i=0;i<pat.len;i++){schedStep(eng,pat,i,t+(i%2?S.swing*sd*.5:0),sd);t+=sd}}
+ const buf=await o.startRendering();return {buf,seconds:total*sd}}
+function encodeWav(buf,minLen){const L=buf.getChannelData(0),R=buf.getChannelData(1);let n=buf.length;while(n>minLen&&Math.abs(L[n-1])<2e-4&&Math.abs(R[n-1])<2e-4)n--;n=Math.min(buf.length,n+2000);
+ const b=new DataView(new ArrayBuffer(44+n*4)),w=(o,s)=>{for(let i=0;i<s.length;i++)b.setUint8(o+i,s.charCodeAt(i))};
+ w(0,'RIFF');b.setUint32(4,36+n*4,true);w(8,'WAVEfmt ');b.setUint32(16,16,true);b.setUint16(20,1,true);b.setUint16(22,2,true);b.setUint32(24,SR,true);b.setUint32(28,SR*4,true);b.setUint16(32,4,true);b.setUint16(34,16,true);w(36,'data');b.setUint32(40,n*4,true);
+ let o=44;for(let i=0;i<n;i++){b.setInt16(o,clamp(L[i],-1,1)*32767,true);b.setInt16(o+2,clamp(R[i],-1,1)*32767,true);o+=4}
+ return new Blob([b],{type:'audio/wav'})}
+function download(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000)}
+const stamp=()=>{const d=new Date(),z=n=>String(n).padStart(2,'0');return d.getFullYear()+z(d.getMonth()+1)+z(d.getDate())+'-'+z(d.getHours())+z(d.getMinutes())};
+async function exportWav(){toast('Собираю трек…',8000);try{const {buf,seconds}=await renderSong();download(encodeWav(buf,Math.floor(seconds*SR)),'gruv-'+stamp()+'.wav');
+ toast((S.song.length?'Песня':'Паттерн ×4')+' сохранён в папку «Загрузки» ('+Math.round(seconds)+' сек)',4000)}catch(e){console.error(e);toast('Не получилось собрать трек: '+e.message)}}
+
+/* ---------- отрисовка ---------- */
+let toastT;function toast(msg,ms){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),ms||2800)}
+const letter=i=>String.fromCharCode(65+i);
+function renderTop(){$('#bpm').value=S.bpm;$('#swing').value=S.swing;$('#master').value=S.master}
+function renderPats(){const p=P();
+ $('#patbar').innerHTML='<span class="muted">Паттерн</span>'+S.patterns.map((_,i)=>`<button class="pb ${i===S.cur?'on':''}" data-act="pat" data-v="${i}">${letter(i)}</button>`).join('')+
+ (S.patterns.length<8?'<button data-act="patnew" title="Новый пустой паттерн">+ Новый</button><button data-act="patdup" title="Копия текущего — удобно делать вариации">Копия</button>':'')+
+ '<span class="sep"></span><span class="muted">Длина</span><div class="seg">'+[16,32].map(n=>`<button class="${p.len===n?'on':''}" data-act="len" data-v="${n}">${n}</button>`).join('')+'</div>'+
+ '<button data-act="patclear">Очистить</button>'+(S.patterns.length>1?'<button data-act="patdel">Удалить</button>':'')+
+ '<span class="grow"></span><span class="muted">Режим</span><div class="seg">'+[['pattern','Паттерн по кругу'],['song','Песню']].map(([v,l])=>`<button class="${S.mode===v?'on':''}" data-act="mode" data-v="${v}">${l}</button>`).join('')+'</div>'}
+function renderGrid(){const p=P(),anySolo=S.tracks.some(t=>t.solo),R=$('#rows');R.style.setProperty('--n',p.len);
+ let h='<div class="ruler"><i></i><div class="cells">';for(let i=0;i<p.len;i++)h+='<div>'+(i%4?'':i/4+1)+'</div>';h+='</div></div>';
+ for(const tr of S.tracks){const col=COLORS[tr.color%COLORS.length],off=tr.mute||(anySolo&&!tr.solo);let cells='';
+  if(tr.type==='sample'){const a=steps(p,tr.id);for(let i=0;i<p.len;i++)cells+=`<div class="c ${a[i]?'on':''} ${(i>>2)%2?'q':''}" data-i="${i}"></div>`}
+  else{const ns=notes(p,tr.id),m=new Array(p.len).fill(0);for(const n of ns){for(let j=n.s+1;j<Math.min(p.len,n.s+n.l);j++)if(!m[j])m[j]=2}for(const n of ns)if(n.s<p.len)m[n.s]=1;
+   for(let i=0;i<p.len;i++)cells+=`<div class="c ${m[i]===1?'on':m[i]===2?'hold':''} ${(i>>2)%2?'q':''}" data-i="${i}"></div>`}
+  h+=`<div class="row ${tr.id===sel?'sel':''} ${off?'off':''}" data-tid="${tr.id}" style="--tc:${col}"><div class="th"><span class="chip" style="background:${col}"></span>
+  <input class="tname" value="${esc(tr.name)}" spellcheck="false" maxlength="40"><span class="kind">${tr.type==='synth'?'синт':''}</span>
+  <button class="m ${tr.mute?'on':''}" data-act="mute" title="Выключить дорожку">M</button><button class="s ${tr.solo?'on':''}" data-act="solo" title="Слушать только её">S</button>
+  <input type="range" class="tvol" data-tv="1" min="0" max="1" step="0.01" value="${tr.vol}" title="Громкость дорожки"><button class="del" data-act="deltrack" title="Удалить дорожку">×</button></div>
+  <div class="cells">${cells}</div></div>`}
+ h+=`<div class="ph"></div><div class="addrow">${S.tracks.length?'':'Пусто. '}Добавь дорожку: нажми «+» у звука слева или перетащи звук сюда.</div>`;
+ R.innerHTML=h}
+function renderSongBar(){let h='<span class="lbl">Песня</span>';
+ h+=S.song.map((pi,i)=>`<button class="sc on" data-act="songdel" data-v="${i}" title="Нажми, чтобы убрать">${letter(pi)}</button>`).join('');
+ h+=S.patterns.map((_,i)=>`<button class="sc sadd" data-act="songadd" data-v="${i}">+ ${letter(i)}</button>`).join('');
+ if(!S.song.length)h+='<span class="muted">— добавляй паттерны по порядку, получится целый трек</span>';
+ else h+=`<span class="muted">${Math.round(S.song.reduce((a,pi)=>a+(S.patterns[pi]||{len:16}).len,0)*60/S.bpm/4)} сек</span>`;
+ $('#song').innerHTML=h}
+function renderLibTabs(){$('#libTabs').innerHTML=[['builtin','Звуки'],['synth','Синты'],['user','Мои'+(userSounds.length?' · '+userSounds.length:'')]].map(([v,l])=>`<button class="${libTab===v?'on':''}" data-act="libtab" data-v="${v}">${l}</button>`).join('');
+ $('#libTools').innerHTML=libTab==='user'?`<button data-act="addfiles">+ Файлы</button><button data-act="adddir">+ Папка</button>${userSounds.length>8?'<input type="search" id="q" placeholder="Поиск по названию" value="'+esc(libQ)+'">':''}`:'';
+ $('#libTools').hidden=libTab!=='user'}
+function renderLib(){renderLibTabs();let h='';
+ const item=(src,name,x)=>`<div class="it" draggable="true" data-src="${src}"><span class="pv">▶</span><span class="nm" title="${esc(name)}">${esc(name)}</span>${x?'<button class="x" data-act="delsound" title="Удалить звук">×</button>':''}<button data-act="addtrack" title="Добавить дорожкой">+</button></div>`;
+ if(libTab==='builtin'){let cat='';for(const [id,name,c] of BUILTIN){if(c!==cat){cat=c;h+=`<div class="grp"><span>${c}</span></div>`}h+=item('b:'+id,name)}}
+ else if(libTab==='synth'){let cat='';for(const id in SYNTHS){const s=SYNTHS[id];if(s.cat!==cat){cat=s.cat;h+=`<div class="grp"><span>${cat}</span></div>`}h+=item('s:'+id,s.name)}}
+ else{const q=libQ.trim().toLowerCase();let arr=userSounds.filter(u=>!q||u.name.toLowerCase().includes(q)||u.folder.toLowerCase().includes(q));
+  if(!userSounds.length)h='<div class="dropHint"><b>Перетащи сюда файлы или целую папку</b><br>wav, mp3, ogg, flac, m4a — сколько угодно.<br>Они сохранятся в приложении и останутся после перезапуска.</div>';
+  else{const total=arr.length;arr=arr.slice().sort((a,b)=>a.folder.localeCompare(b.folder,'ru')||a.name.localeCompare(b.name,'ru',{numeric:true})).slice(0,400);let f=null;
+   for(const u of arr){if(u.folder!==f){f=u.folder;h+=`<div class="grp"><span title="${esc(f)}">${esc(f)}</span><button data-act="delfolder" data-v="${esc(f)}" title="Удалить всю папку">×</button></div>`}h+=item('u:'+u.id,u.name,true)}
+   if(!total)h='<div class="dropHint">Ничего не нашлось</div>';else if(total>400)h+=`<div class="dropHint">Показаны первые 400 из ${total} — уточни поиск</div>`}}
+ $('#list').innerHTML=h}
+const FMT={pitch:v=>(v>0?'+':'')+v+' пт',pan:v=>Math.abs(v)<.03?'центр':(v<0?'лев ':'прав ')+Math.round(Math.abs(v)*100),'fx.filter.freq':v=>v<1000?Math.round(v)+' Гц':(v/1000).toFixed(1)+' кГц','fx.delay.div':v=>['','1/16','1/8','1/8 т.','1/4'][v]||v,bright:v=>'×'+(+v).toFixed(2),rel:v=>'×'+(+v).toFixed(2),'fx.filter.q':v=>(+v).toFixed(1)};
+const fmt=(p,v)=>(FMT[p]||(x=>Math.round(x*100)+'%'))(+v);
+const getP=(o,p)=>p.split('.').reduce((a,k)=>a[k],o);
+function setP(o,p,v){const ks=p.split('.'),l=ks.pop();ks.reduce((a,k)=>a[k],o)[l]=v}
+function sl(tr,label,p,min,max,step){const v=getP(tr,p);if(p==='fx.filter.freq')return `<label class="k"><span>${label}</span><input type="range" data-p="${p}" data-log="1" min="0" max="1" step="0.005" value="${Math.log2(v/40)/9}"><output>${fmt(p,v)}</output></label>`;
+ return `<label class="k"><span>${label}</span><input type="range" data-p="${p}" min="${min}" max="${max}" step="${step}" value="${v}"><output>${fmt(p,v)}</output></label>`}
+function renderDev(){const tr=T(sel),D=$('#dev');
+ if(!tr){document.body.classList.remove('notes');D.innerHTML='<div class="empty">Выбери дорожку — здесь появятся её звук и эффекты.</div>';return}
+ const col=COLORS[tr.color%COLORS.length],isS=tr.type==='synth',tab=isS?devTab:'fx';
+ let h=`<div class="dh"><span class="chip" style="background:${col}"></span><b>${esc(tr.name)}</b>`;
+ if(isS)h+=`<div class="seg"><button class="${tab==='notes'?'on':''}" data-act="devtab" data-v="notes">Ноты</button><button class="${tab==='fx'?'on':''}" data-act="devtab" data-v="fx">Звук и эффекты</button></div>`;
+ if(isS&&tab==='notes')h+=`<span class="grow"></span><span class="muted" title="Ноты не из лада заштрихованы — ставь на чистые строки, и будет звучать ровно">Лад</span><select data-sc="root">${RU_NOTE.map((n,i)=>`<option value="${i}" ${S.scale.root===i?'selected':''}>${n} (${NN[i]})</option>`).join('')}</select>
+  <select data-sc="type">${[['minor','минор'],['major','мажор'],['penta','пентатоника'],['all','все ноты']].map(([v,l])=>`<option value="${v}" ${S.scale.type===v?'selected':''}>${l}</option>`).join('')}</select><button data-act="notesclear">Стереть ноты</button>`;
+ else h+='<span class="grow"></span><span class="muted">Клавиши A S D F G H J K — сыграть этим звуком</span>';
+ h+='</div>';
+ if(isS&&tab==='notes'){const p=P(),sc=SCALES[S.scale.type];let keys='',rows='';
+  for(let n=NMAX;n>=NMIN;n--){const pc=n%12,bk=[1,3,6,8,10].includes(pc),dim=sc&&!sc.includes((pc-S.scale.root+12)%12);
+   keys+=`<div class="${bk?'bk':''} ${pc===0?'cn':''}">${NN[pc]+(Math.floor(n/12)-1)}</div>`;rows+=`<div class="r ${bk?'bk':''} ${dim?'dim':''}"></div>`}
+  const nh=notes(p,tr.id).filter(n=>n.s<p.len&&n.n>=NMIN&&n.n<=NMAX).map((n,i)=>`<div class="note" data-s="${n.s}" data-n="${n.n}" style="left:calc(100% * ${n.s} / ${p.len});width:calc(100% * ${Math.min(n.l,p.len-n.s)} / ${p.len} - 1px);top:${(NMAX-n.n)*RH}px"></div>`).join('');
+  h+=`<div class="roll" id="roll"><div class="keys">${keys}</div><div class="area" id="area" style="--n:${p.len};--tc:${col};height:${(NMAX-NMIN+1)*RH}px">${rows}<div class="vb"></div><div class="vl"></div>${nh}<div class="rph"></div></div></div>`}
+ else{const f=tr.fx,fxh=(k,title)=>`<h4>${title}<button class="${f[k].on?'on':''}" data-act="fx" data-v="${k}">${f[k].on?'Вкл':'Выкл'}</button></h4>`;
+  h+='<div class="dbody"><div class="dv"><h4>Источник</h4>';
+  if(isS)h+=`<label class="k"><span>Синт</span><select data-preset="1">${Object.keys(SYNTHS).map(id=>`<option value="${id}" ${tr.preset===id?'selected':''}>${SYNTHS[id].name}</option>`).join('')}</select></label>`+sl(tr,'Яркость','bright',.25,4,.05)+sl(tr,'Хвост','rel',.3,4,.05);
+  else h+=`<div class="srcname" title="${esc(srcName(tr.src))}">${esc(srcName(tr.src))}</div><div class="muted" style="font-size:12px">Заменить: перетащи другой звук из списка слева на эту дорожку</div>`;
+  h+=sl(tr,'Высота','pitch',-12,12,1)+sl(tr,'Панорама','pan',-1,1,.05);
+  if(!isS)h+=`<label class="chk"><input type="checkbox" data-cut="1" ${tr.cut?'checked':''}>Обрывать прошлый удар</label>`;
+  h+=`</div><div class="dv ${f.filter.on?'':'offd'}">${fxh('filter','Фильтр')}<label class="k"><span>Тип</span><select data-ftype="1"><option value="lowpass" ${f.filter.type==='lowpass'?'selected':''}>Убрать верх</option><option value="highpass" ${f.filter.type==='highpass'?'selected':''}>Убрать низ</option></select></label>${sl(tr,'Частота','fx.filter.freq')}${sl(tr,'Резонанс','fx.filter.q',.1,14,.1)}</div>
+  <div class="dv ${f.drive.on?'':'offd'}">${fxh('drive','Перегруз')}${sl(tr,'Сила','fx.drive.amt',0,1,.01)}<div class="muted" style="font-size:12px">Делает звук грязнее и плотнее. Хорош на бочке и басу.</div></div>
+  <div class="dv ${f.delay.on?'':'offd'}">${fxh('delay','Эхо')}${sl(tr,'Время','fx.delay.div',1,4,1)}${sl(tr,'Повторы','fx.delay.fb',0,.85,.01)}${sl(tr,'Уровень','fx.delay.mix',0,1,.01)}</div>
+  <div class="dv ${f.reverb.on?'':'offd'}">${fxh('reverb','Реверб')}${sl(tr,'Уровень','fx.reverb.mix',0,1,.01)}<div class="muted" style="font-size:12px">Объём, как в большом зале. На клэпе и аккордах — самое то.</div></div></div>`}
+ D.innerHTML=h;document.body.classList.toggle('notes',isS&&tab==='notes');
+ const roll=$('#roll');if(roll){if(rollScroll[tr.id]!=null)roll.scrollTop=rollScroll[tr.id];else{const ns=notes(P(),tr.id),mid=ns.length?ns.reduce((a,n)=>a+n.n,0)/ns.length:(SYNTHS[tr.preset]||SYNTHS.bass).key+6;roll.scrollTop=(NMAX-mid)*RH-roll.clientHeight/2}
+  roll.onscroll=()=>{rollScroll[tr.id]=roll.scrollTop}}}
+function renderMenu(){const th=document.body.dataset.theme;$('#menu').innerHTML=`<button data-act="help">Как пользоваться</button><hr>
+ <button data-act="newproj">Новый пустой проект</button><button data-act="demo">Загрузить демо-бит</button><hr>
+ <button data-act="saveproj">Сохранить проект в файл</button><button data-act="openproj">Открыть проект из файла</button><hr>
+ <div class="muted" style="padding:4px 10px 0">Тема</div><div class="th3">${[['arbuz','Арбуз'],['asiimov','Азимов'],['night','Ночь']].map(([v,l])=>`<button class="${th===v?'on':''}" data-act="theme" data-v="${v}">${l}</button>`).join('')}</div>`}
+function renderHelp(){$('#help').innerHTML=`<div class="box"><h3>Как тут всё устроено</h3><ol>
+ <li>Слева — звуки. Клик по названию — послушать, «+» — добавить дорожкой.</li>
+ <li>В сетке кликай по клеткам: где клетка горит — там звук сыграет. Можно вести мышкой с зажатой кнопкой.</li>
+ <li><kbd>Пробел</kbd> — играть / стоп. <kbd>Ctrl+Z</kbd> — отменить.</li>
+ <li>Свои звуки: вкладка «Мои» — перетащи файлы или папку прямо в окно. Они останутся в приложении.</li>
+ <li>Синты (бас, клавиши): выбери дорожку и рисуй ноты внизу. Клик — поставить, потяни вправо — длиннее, клик по ноте — убрать.</li>
+ <li>У каждой дорожки внизу свои эффекты: фильтр, перегруз, эхо, реверб.</li>
+ <li>Паттерны A, B, C — разные куски бита. В строке «Песня» собери их по порядку.</li>
+ <li>«Сохранить WAV» — готовый трек файлом в папку «Загрузки».</li></ol>
+ <button class="accent" data-act="closehelp">Понятно</button></div>`}
+function renderAll(){renderTop();renderPats();renderGrid();renderSongBar();renderDev()}
+function commit(){save();renderAll();if(live)live.applyAll()}
+function select(id,tab){sel=id;if(tab)devTab=tab;$$('#rows .row').forEach(r=>r.classList.toggle('sel',r.dataset.tid===id));renderDev()}
+
+/* ---------- действия ---------- */
+function addTrackFromSrc(src){pushUndo();let tr;const color=S.tracks.length?(Math.max(...S.tracks.map(t=>t.color))+1)%COLORS.length:0;
+ if(src[0]==='s'){const id=src.slice(2);tr=newTrack({type:'synth',preset:id,name:SYNTHS[id].name,color});devTab='notes'}
+ else tr=newTrack({src,name:srcName(src),color});
+ if(S.tracks.length>=24){toast('Максимум 24 дорожки');undo.pop();return}
+ S.tracks.push(tr);sel=tr.id;commit();if(tr.type==='sample')loadBuf(src).catch(()=>toast('Этот файл не читается как звук'));
+ const w=$('#rowsWrap');w.scrollTop=w.scrollHeight;return tr}
+function setLen(n){const p=P();if(p.len===n)return;pushUndo();const old=p.len;
+ for(const id in p.steps){const a=p.steps[id],b=new Array(n).fill(0);for(let i=0;i<n;i++)b[i]=n>old?a[i%old]||0:a[i]||0;p.steps[id]=b}
+ for(const id in p.notes){let ns=p.notes[id];if(n>old)ns=ns.concat(ns.map(x=>({s:x.s+old,n:x.n,l:x.l})));else ns=ns.filter(x=>x.s<n).map(x=>({s:x.s,n:x.n,l:Math.min(x.l,n-x.s)}));p.notes[id]=ns}
+ p.len=n;commit()}
+const ACT={
+ play(){play.on?stop():start()},
+ bpm(a){pushUndo();S.bpm=clamp(S.bpm+ +a.dataset.v,40,240);commit()},
+ undo(){if(!undo.length){toast('Отменять нечего');return}S=JSON.parse(undo.pop());if(!T(sel))sel=S.tracks[0]&&S.tracks[0].id;commit()},
+ export(){exportWav()},
+ menu(){const m=$('#menu');if(m.hidden){renderMenu();m.hidden=false}else m.hidden=true},
+ help(){$('#menu').hidden=true;renderHelp();$('#help').hidden=false},
+ closehelp(){$('#help').hidden=true;localStorage.setItem('gruv_seen','1')},
+ theme(a){document.body.dataset.theme=a.dataset.v;localStorage.setItem('gruv_theme',a.dataset.v);renderMenu()},
+ newproj(){pushUndo();stop();S=emptyProject();sel=S.tracks[0].id;$('#menu').hidden=true;commit();toast('Новый проект. Старый можно вернуть через «Отмена»')},
+ demo(){pushUndo();stop();S=demoProject();sel=S.tracks[0].id;$('#menu').hidden=true;commit()},
+ saveproj(){download(new Blob([JSON.stringify(S)],{type:'application/json'}),'gruv-project-'+stamp()+'.json');$('#menu').hidden=true;toast('Проект сохранён в «Загрузки». Свои звуки хранятся в самом приложении')},
+ openproj(){$('#menu').hidden=true;$('#fProj').click()},
+ pat(a){S.cur=+a.dataset.v;save();renderPats();renderGrid();renderDev()},
+ patnew(){pushUndo();S.patterns.push(newPattern(P().len));S.cur=S.patterns.length-1;commit()},
+ patdup(){pushUndo();S.patterns.push(JSON.parse(JSON.stringify(P())));S.cur=S.patterns.length-1;commit();toast('Сделал копию — это паттерн '+letter(S.cur))},
+ patclear(){pushUndo();const p=P();p.steps={};p.notes={};commit()},
+ patdel(){pushUndo();const i=S.cur;S.patterns.splice(i,1);S.song=S.song.filter(x=>x!==i).map(x=>x>i?x-1:x);S.cur=Math.min(i,S.patterns.length-1);commit()},
+ len(a){setLen(+a.dataset.v)},
+ mode(a){S.mode=a.dataset.v;if(S.mode==='song'&&!S.song.length)toast('Песня пока пустая — добавь паттерны в строку «Песня» ниже');play.pos=0;save();renderPats()},
+ songadd(a){pushUndo();S.song.push(+a.dataset.v);save();renderSongBar()},
+ songdel(a){pushUndo();S.song.splice(+a.dataset.v,1);save();renderSongBar()},
+ libtab(a){libTab=a.dataset.v;renderLib()},
+ addfiles(){$('#fFiles').click()},adddir(){$('#fDir').click()},
+ addtrack(a){addTrackFromSrc(a.closest('.it').dataset.src)},
+ delsound(a){delSounds([a.closest('.it').dataset.src.slice(2)])},
+ delfolder(a){const f=a.dataset.v,ids=userSounds.filter(u=>u.folder===f).map(u=>u.id);if(confirm('Удалить папку «'+f+'» — звуков: '+ids.length+'?'))delSounds(ids)},
+ mute(a,tr){pushUndo();tr.mute=!tr.mute;commit()},
+ solo(a,tr){pushUndo();tr.solo=!tr.solo;commit()},
+ deltrack(a,tr){pushUndo();S.tracks=S.tracks.filter(t=>t!==tr);for(const p of S.patterns){delete p.steps[tr.id];delete p.notes[tr.id]}if(sel===tr.id)sel=S.tracks[0]&&S.tracks[0].id;commit();toast('Дорожка удалена. Вернуть — «Отмена»')},
+ devtab(a){devTab=a.dataset.v;renderDev()},
+ fx(a){const tr=T(sel);pushUndo();tr.fx[a.dataset.v].on=!tr.fx[a.dataset.v].on;save();renderDev();if(live)live.apply(tr)},
+ notesclear(){const tr=T(sel);pushUndo();P().notes[tr.id]=[];commit()},
+};
+document.addEventListener('click',e=>{const a=e.target.closest('[data-act]');
+ if(!e.target.closest('#menu')&&!(a&&a.dataset.act==='menu'))$('#menu').hidden=true;
+ if(e.target.id==='help'){ACT.closehelp();return}
+ if(a){const row=a.closest('.row');ACT[a.dataset.act](a,row&&T(row.dataset.tid));return}
+ const it=e.target.closest('.it');if(it){const s=it.dataset.src;s[0]==='s'?previewSynth(s.slice(2)):preview(s)}});
+$('#bpm').addEventListener('change',e=>{pushUndo();S.bpm=clamp(Math.round(+e.target.value)||120,40,240);commit()});
+$('#swing').addEventListener('input',e=>{S.swing=+e.target.value;save()});
+$('#master').addEventListener('input',e=>{S.master=+e.target.value;save();if(live)live.set(live.master.gain,S.master)});
+/* сетка: рисование клеток */
+let paint=null;
+$('#rows').addEventListener('mousedown',e=>{const row=e.target.closest('.row');if(!row)return;const tr=T(row.dataset.tid),c=e.target.closest('.c');
+ if(c){e.preventDefault();if(tr.type==='synth'){select(tr.id,'notes');return}
+  pushUndo();const a=steps(P(),tr.id),i=+c.dataset.i,v=a[i]?0:1;paint={tid:tr.id,v};a[i]=v;c.classList.toggle('on',!!v);if(v&&!play.on)audition(tr);if(sel!==tr.id)select(tr.id);return}
+ if(sel!==tr.id&&!e.target.closest('button'))select(tr.id)});
+$('#rows').addEventListener('mouseover',e=>{if(!paint)return;const c=e.target.closest('.c'),row=e.target.closest('.row');if(!c||!row||row.dataset.tid!==paint.tid)return;steps(P(),paint.tid)[+c.dataset.i]=paint.v;c.classList.toggle('on',!!paint.v)});
+$('#rows').addEventListener('change',e=>{const row=e.target.closest('.row');if(!row)return;const tr=T(row.dataset.tid);if(e.target.classList.contains('tname')){pushUndo();tr.name=e.target.value.trim()||'Дорожка';save();renderDev()}if(e.target.dataset.tv)save()});
+$('#rows').addEventListener('input',e=>{if(!e.target.dataset.tv)return;const tr=T(e.target.closest('.row').dataset.tid);tr.vol=+e.target.value;if(live)live.apply(tr)});
+$('#rows').addEventListener('pointerdown',e=>{if(e.target.dataset.tv)pushUndo()});
+$('#rows').addEventListener('keydown',e=>{if(e.target.classList.contains('tname')&&e.key==='Enter')e.target.blur()});
+/* панель устройств */
+const dev=$('#dev');
+dev.addEventListener('pointerdown',e=>{if(e.target.dataset.p)pushUndo()});
+dev.addEventListener('input',e=>{const el=e.target,tr=T(sel);if(!tr||!el.dataset.p)return;let v=+el.value;if(el.dataset.log)v=40*Math.pow(2,v*9);setP(tr,el.dataset.p,v);el.nextElementSibling.textContent=fmt(el.dataset.p,v);if(live)live.apply(tr)});
+dev.addEventListener('change',e=>{const el=e.target,tr=T(sel);if(!tr)return;
+ if(el.dataset.p){save();return}
+ if(el.dataset.preset){pushUndo();tr.preset=el.value;save();audition(tr)}
+ else if(el.dataset.ftype){pushUndo();tr.fx.filter.type=el.value;save();if(live)live.apply(tr)}
+ else if(el.dataset.cut){pushUndo();tr.cut=el.checked;save()}
+ else if(el.dataset.sc){S.scale[el.dataset.sc]=el.dataset.sc==='root'?+el.value:el.value;save();renderDev()}});
+/* ноты */
+let nd=null;
+function areaPos(e){const ar=$('#area'),r=ar.getBoundingClientRect(),p=P();return {s:clamp(Math.floor((e.clientX-r.left)/r.width*p.len),0,p.len-1),n:clamp(NMAX-Math.floor((e.clientY-r.top)/RH),NMIN,NMAX)}}
+dev.addEventListener('mousedown',e=>{const ar=e.target.closest('#area');if(!ar)return;e.preventDefault();const tr=T(sel),ns=notes(P(),tr.id);pushUndo();
+ if(e.target.classList.contains('note')){const s=+e.target.dataset.s,n=+e.target.dataset.n,i=ns.findIndex(x=>x.s===s&&x.n===n);if(i>=0)ns.splice(i,1);save();renderDev();renderGrid();return}
+ const {s,n}=areaPos(e),note={s,n,l:1};ns.push(note);nd={note,tid:tr.id};audition(tr,n);renderDev()});
+window.addEventListener('mousemove',e=>{if(!nd||!$('#area'))return;const {s}=areaPos(e),l=Math.max(1,s-nd.note.s+1);if(l!==nd.note.l){nd.note.l=l;renderDev()}});
+window.addEventListener('mouseup',()=>{if(paint){paint=null;save()}if(nd){nd=null;save();renderGrid()}});
+/* клавиатура */
+const KEYMAP={KeyA:0,KeyW:1,KeyS:2,KeyE:3,KeyD:4,KeyF:5,KeyT:6,KeyG:7,KeyY:8,KeyH:9,KeyU:10,KeyJ:11,KeyK:12};
+document.addEventListener('keydown',e=>{const tag=e.target.tagName,typing=tag==='INPUT'&&e.target.type!=='range'&&e.target.type!=='checkbox'||tag==='SELECT';
+ if(e.code==='Escape'){$('#menu').hidden=true;if(!$('#help').hidden)ACT.closehelp();return}
+ if((e.ctrlKey||e.metaKey)&&e.code==='KeyZ'&&!typing){e.preventDefault();ACT.undo();return}
+ if((e.ctrlKey||e.metaKey)&&e.code==='KeyS'){e.preventDefault();ACT.saveproj();return}
+ if(typing||e.ctrlKey||e.metaKey||e.altKey)return;
+ if(e.code==='Space'){e.preventDefault();if(e.target.tagName==='BUTTON')e.target.blur();ACT.play();return}
+ if(e.code in KEYMAP&&!e.repeat){const tr=T(sel);if(tr)audition(tr,(tr.type==='synth'?(SYNTHS[tr.preset]||SYNTHS.bass).key:60)+KEYMAP[e.code])}});
+/* перетаскивание: файлы с компа и звуки из списка */
+function readEntry(en,path,out){return new Promise(res=>{if(en.isFile)en.file(f=>{out.push({f,folder:path});res()},()=>res());
+ else if(en.isDirectory){const rd=en.createReader(),sub=path?path+' / '+en.name:en.name;const loop=()=>rd.readEntries(async es=>{if(!es.length)return res();for(const x of es)await readEntry(x,sub,out);loop()},()=>res());loop()}else res()})}
+let dragDepth=0;const isFiles=e=>e.dataTransfer&&[...e.dataTransfer.types].includes('Files');
+window.addEventListener('dragenter',e=>{if(isFiles(e)){dragDepth++;document.body.classList.add('dragging')}});
+window.addEventListener('dragleave',e=>{if(isFiles(e)&&--dragDepth<=0){dragDepth=0;document.body.classList.remove('dragging')}});
+window.addEventListener('dragover',e=>{e.preventDefault();const row=e.target.closest&&e.target.closest('.row');$$('.row.over').forEach(r=>r!==row&&r.classList.remove('over'));if(row&&!isFiles(e))row.classList.add('over')});
+window.addEventListener('drop',async e=>{e.preventDefault();dragDepth=0;document.body.classList.remove('dragging');$$('.row.over').forEach(r=>r.classList.remove('over'));
+ if(isFiles(e)){const plain=[...e.dataTransfer.files].map(f=>({f,folder:''})),ents=[...e.dataTransfer.items].map(i=>i.webkitGetAsEntry&&i.webkitGetAsEntry()).filter(Boolean),out=[];
+  let hadDir=false;try{for(const en of ents){if(en.isDirectory)hadDir=true;await readEntry(en,'',out)}}catch(err){}
+  const use=out.length?out:plain;const n=await importFiles(use);if(!n&&hadDir)toast('Папку так прочитать не вышло — нажми «+ Папка» во вкладке «Мои» и выбери её',6000);return}
+ const src=e.dataTransfer.getData('text/plain');if(!/^[bus]:/.test(src))return;const row=e.target.closest('.row');
+ if(row&&src[0]!=='s'){const tr=T(row.dataset.tid);if(tr.type==='sample'){pushUndo();tr.src=src;if(/^Дорожка$/.test(tr.name)||BUILTIN.some(b=>b[1]===tr.name)||userSounds.some(u=>u.name===tr.name))tr.name=srcName(src);sel=tr.id;commit();loadBuf(src).then(()=>audition(tr),()=>toast('Этот файл не читается как звук'));return}}
+ if(e.target.closest('#work'))addTrackFromSrc(src)});
+document.addEventListener('dragstart',e=>{const it=e.target.closest&&e.target.closest('.it');if(it){e.dataTransfer.setData('text/plain',it.dataset.src);e.dataTransfer.effectAllowed='copy'}});
+$('#fFiles').addEventListener('change',e=>{importFiles([...e.target.files].map(f=>({f,folder:''})));e.target.value=''});
+$('#fDir').addEventListener('change',e=>{importFiles([...e.target.files].map(f=>({f,folder:(f.webkitRelativePath||'').split('/').slice(0,-1).join(' / ')})));e.target.value=''});
+$('#fProj').addEventListener('change',async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{const o=JSON.parse(await f.text());if(!Array.isArray(o.tracks)||!Array.isArray(o.patterns)||!o.patterns.length)throw 0;pushUndo();stop();S=Object.assign(emptyProject(),o);sel=S.tracks[0]&&S.tracks[0].id;commit();toast('Проект открыт')}catch(err){toast('Это не файл проекта «Грув»')}});
+document.addEventListener('input',e=>{if(e.target.id==='q'){libQ=e.target.value;const pos=e.target.selectionStart;renderLib();const q=$('#q');if(q){q.focus();q.setSelectionRange(pos,pos)}}});
+window.addEventListener('blur',()=>{paint=null});
+
+/* ---------- кадр: бегунок и индикатор уровня ---------- */
+const mc=$('#meter').getContext('2d');let lvl=0;
+function frame(){requestAnimationFrame(frame);
+ if(an){an.getFloatTimeDomainData(mbuf);let p=0;for(let i=0;i<mbuf.length;i++)p=Math.max(p,Math.abs(mbuf[i]));lvl=Math.max(p,lvl*.9)}else lvl=0;
+ const cs=getComputedStyle(document.body);mc.clearRect(0,0,96,14);mc.fillStyle=lvl>.95?cs.getPropertyValue('--hot'):cs.getPropertyValue('--accent');mc.fillRect(0,0,Math.min(1,lvl)*96,14);
+ if(play.on&&ctx){let cur=null;while(play.q.length&&play.q[0].t<=ctx.currentTime)cur=play.q.shift();
+  if(cur){if(cur.pi!==S.cur&&!paint&&!nd){S.cur=cur.pi;renderPats();renderGrid();renderDev()}
+   document.body.style.setProperty('--ph',cur.step);
+   if(songOn())$$('#song .sc.on').forEach((el,i)=>el.classList.toggle('now',i===cur.pos))}}}
+
+/* ---------- запуск ---------- */
+genBuiltins();
+document.body.dataset.theme=localStorage.getItem('gruv_theme')||'arbuz';
+renderAll();renderLib();requestAnimationFrame(frame);
+idb('meta','readonly',s=>s.getAll()).then(a=>{userSounds=a||[];renderLib();renderGrid();renderDev();preload()}).catch(e=>{console.warn('idb',e)});
+if(!localStorage.getItem('gruv_seen')){renderHelp();$('#help').hidden=false}
+window.__app={get S(){return S},set S(v){S=v},renderSong,encodeWav,importFiles,start,stop,play,loadBuf,BUF,addTrackFromSrc,commit,ACT,get userSounds(){return userSounds},get ctx(){return ctx},get lvl(){return lvl},select};
+</script>
+</body>
+</html>
